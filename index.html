@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assessment Flashcards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Literata:opsz,wght@7..72,500;7..72,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="eyebrow">Study Sprint</p>
+        <h1>Assessment Flashcards</h1>
+        <p>
+          Drill high-level concepts and sample problems across Math, Reading,
+          Writing, and Science.
+        </p>
+        <div class="tools-links" aria-label="Study tools">
+          <span>Tools:</span>
+          <a href="https://www.desmos.com/testing/collegeboard/fourfunction" target="_blank" rel="noopener noreferrer">Desmos Four-Function</a>
+          <a href="https://www.desmos.com/testing/collegeboard/scientific" target="_blank" rel="noopener noreferrer">Desmos Scientific</a>
+          <a href="https://www.desmos.com/testing/collegeboard/graphing" target="_blank" rel="noopener noreferrer">Desmos Graphing</a>
+        </div>
+      </header>
+
+      <section class="controls-wrap" aria-label="Flashcard controls">
+        <div class="controls">
+          <div class="filter-field">
+            <label for="examFilter">Exam</label>
+            <select id="examFilter">
+              <option value="all">All</option>
+              <option value="ACT">ACT</option>
+              <option value="SAT">SAT</option>
+              <option value="Both">Both</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="typeFilter">Card Type</label>
+            <select id="typeFilter">
+              <option value="all">All</option>
+              <option value="concept">Concept</option>
+              <option value="problem">Sample Problem</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="subjectFilter">Subject</label>
+            <select id="subjectFilter">
+              <option value="all">All</option>
+              <option value="Math">Math</option>
+              <option value="Reading">Reading</option>
+              <option value="Writing">Writing</option>
+              <option value="Science">Science</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="difficultyFilter">Difficulty</label>
+            <select id="difficultyFilter">
+              <option value="all">All</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="difficult">Difficult</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="questionTypeFilter">Question Type</label>
+            <select id="questionTypeFilter">
+              <option value="all">All</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tracking-controls">
+          <p id="sessionStats">Attempts: 0 | Correct: 0 | Incorrect: 0</p>
+          <div class="tracking-actions">
+            <button id="reviewMissedBtn" type="button">Review Missed: Off</button>
+            <button id="resetTrackingBtn" type="button">Reset Tracking</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card-shell" aria-live="polite">
+        <p class="meta" id="cardMeta"></p>
+        <p class="attributes" id="cardAttributes"></p>
+        <button class="card" id="flashcard" aria-label="Flip flashcard">
+          <span class="face front" id="cardFront"></span>
+          <span class="face back" id="cardBack"></span>
+        </button>
+        <p class="flip-hint">Click card to flip</p>
+        <div class="grade-actions" aria-label="Answer self-report">
+          <button id="incorrectBtn" type="button">I Missed This</button>
+          <button id="correctBtn" type="button">I Got It Right</button>
+        </div>
+      </section>
+
+      <nav class="actions" aria-label="Flashcard actions">
+        <button id="prevBtn" type="button">Previous</button>
+        <button id="shuffleBtn" type="button">Shuffle</button>
+        <button id="nextBtn" type="button">Next</button>
+      </nav>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
