@@ -1,0 +1,17 @@
+[
+  {
+    "id": "custom-q-001",
+    "exam": "ACT",
+    "subject": "Math",
+    "type": "practice",
+    "questionType": "Custom Import",
+    "difficulty": "medium",
+    "focus": ["algebra", "linear equations"],
+    "source": "Custom import",
+    "front": "Question 1\n\nSolve for x: 3x - 7 = 11\n\nA. 4\nB. 5\nC. 6\nD. 7",
+    "choices": "A. 4\nB. 5\nC. 6\nD. 7",
+    "answer": "C. 6",
+    "explanation": "Add 7 to both sides to get 3x = 18, then divide by 3 to get x = 6.",
+    "back": "Correct answer: C (6). Add 7 to both sides, then divide by 3."
+  }
+]

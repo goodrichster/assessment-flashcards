@@ -1,5 +1,31 @@
-const cards = [
+const baseCards = [
   // Math
+  {
+    id: "m-0",
+    exam: "ACT",
+    subject: "Math",
+    type: "practice",
+    questionType: "Trigonometry",
+    difficulty: "medium",
+    focus: ["right triangles", "inverse trig", "opposite/hypotenuse"],
+    source: "ACT Practice Test",
+    front: "Image-based problem: Which inverse trig expression gives the angle of inclination of the ramp?",
+    frontImage: "images/ramp-angle-question.png",
+    frontImageAlt:
+      "ACT-style math question screenshot showing a ramp triangle with ramp length 11.5 feet and height 3 feet plus multiple-choice inverse trig expressions.",
+    frontImageCaption:
+      "Place the screenshot at images/ramp-angle-question.png to display the original problem image.",
+    answer: "sin^-1(3/11.5)",
+    explanation:
+      "The 11.5-foot ramp is the hypotenuse and the 3-foot vertical rise is the side opposite the angle at the ground. That gives sin(theta) = opposite / hypotenuse = 3 / 11.5, so theta = sin^-1(3/11.5).",
+    eliminationNotes: [
+      "tan^-1(3/11.5) is not correct because 11.5 is the hypotenuse, not the adjacent side.",
+      "cos^-1(3/11.5) is not correct because the 3-foot side is opposite the angle, not adjacent.",
+      "sin^-1(11.5/3) and cos^-1(11.5/3) use a ratio greater than 1, which is invalid here.",
+    ],
+    back:
+      "Answer: sin^-1(3/11.5). Use opposite/hypotenuse because the known sides are the 3-foot rise and 11.5-foot ramp.",
+  },
   {
     id: "m-1",
     exam: "Both",
@@ -1306,6 +1332,71 @@ const cards = [
   },
 ];
 
+function getGeometryCards() {
+  if (typeof geometryCards !== "undefined" && Array.isArray(geometryCards) && geometryCards.length > 0)
+    return geometryCards;
+  const fallback = buildInlineGeometryCards();
+  if (typeof window !== "undefined" && !window.geometryDiagnosticSet)
+    window.geometryDiagnosticSet = fallback.map((c) => c.id);
+  return fallback;
+}
+
+function buildInlineGeometryCards() {
+  const d = (q, opts, ans, steps, key, topic, diff) => ({
+    id: `HG-${String(++buildInlineGeometryCards._n).padStart(2, "0")}`,
+    exam: "HSGeometry",
+    subject: "Geometry",
+    type: "practice",
+    questionType: topic,
+    difficulty: diff,
+    focus: [topic],
+    source: "H.S. Geometry Assessment",
+    front: q + (opts && opts.length ? "\n\n" + opts.map((o, i) => String.fromCharCode(65 + i) + ". " + o).join("\n") : ""),
+    back: (steps || []).join("\n\n") + (key ? "\n\nKey: " + key : ""),
+    answer: ans,
+    explanation: (steps || []).join(" "),
+    topic,
+    correctAnswer: ans,
+    solutionSteps: Array.isArray(steps) ? steps : [steps],
+    keyTheorem: key,
+    isDiagnostic: true,
+  });
+  buildInlineGeometryCards._n = 0;
+  return [
+    d("Which of the following has no length, width, or thickness and is represented by a dot?", ["Line", "Plane", "Point", "Segment"], "Point", ["Recall definition of point: a location with no size.", "A point is represented by a dot and has no dimensions."], "Definition of point", "Definitions", "easy"),
+    d("A ray has one endpoint and extends infinitely in one direction. A segment has how many endpoints?", ["Zero", "One", "Two", "Infinitely many"], "Two", ["Segment: part of a line with two endpoints.", "Ray: one endpoint, extends infinitely in one direction."], "Definitions of segment and ray", "Definitions", "easy"),
+    d("Two lines that intersect to form right angles are called ____.", ["Parallel", "Perpendicular", "Skew", "Collinear"], "Perpendicular", ["Perpendicular lines intersect at 90°."], "Definition of perpendicular", "Definitions", "easy"),
+    d("When two lines intersect, the angles opposite each other are called vertical angles. They are always ____.", ["Supplementary", "Complementary", "Congruent", "Right"], "Congruent", ["Vertical Angles Theorem: vertical angles are congruent."], "Vertical Angles Theorem", "Angle Relationships", "easy"),
+    d("Two angles that form a linear pair are ____.", ["Congruent", "Complementary", "Supplementary", "Vertical"], "Supplementary", ["Linear pair: two adjacent angles whose non-common sides form a line. They are always supplementary (sum = 180°)."], "Linear Pair Postulate", "Angle Relationships", "easy"),
+    d("If the measure of an angle is 3x and its supplement is 2x + 20, what is x?", ["20", "32", "40", "60"], "32", ["Supplementary angles sum to 180°: 3x + (2x + 20) = 180.", "5x + 20 = 180 → 5x = 160 → x = 32."], "Supplementary angles sum to 180°", "Angle Relationships", "medium"),
+    d("Two angles are complementary. One angle is 15° more than twice the other. What is the measure of the larger angle?", ["25°", "35°", "55°", "65°"], "65°", ["Complementary: sum = 90°. Let smaller = x, larger = 2x + 15.", "x + (2x + 15) = 90 → 3x = 75 → x = 25. Larger = 65°."], "Complementary angles sum to 90°", "Angle Relationships", "medium"),
+    d("In a diagram, two lines intersect. One angle is 70°. What are the measures of the other three angles?", ["70°, 110°, 110°", "70°, 70°, 110°", "20°, 70°, 90°", "70°, 100°, 100°"], "70°, 110°, 110°", ["Vertical to 70° is 70°. Each of the other two angles forms a linear pair with 70°, so each is 180° − 70° = 110°."], "Vertical Angles and Linear Pair", "Angle Relationships", "easy"),
+    d("When a transversal crosses two parallel lines, alternate interior angles are ____.", ["Supplementary", "Complementary", "Congruent", "Right"], "Congruent", ["Alternate interior angles are congruent when lines are parallel."], "Alternate Interior Angles", "Parallel Lines", "easy"),
+    d("If a transversal cuts two parallel lines and one corresponding angle is 115°, what is the measure of the angle that is alternate exterior to it?", ["65°", "90°", "115°", "245°"], "115°", ["Corresponding and alternate exterior angles are congruent when lines are parallel; so 115°."], "Corresponding and Alternate Exterior Angles", "Parallel Lines", "medium"),
+    d("Same-side interior angles when a transversal cuts two parallel lines are ____.", ["Congruent", "Supplementary", "Complementary", "Vertical"], "Supplementary", ["Same-side interior angles are supplementary (sum = 180°) when lines are parallel."], "Same-Side Interior Angles", "Parallel Lines", "easy"),
+    d("Two parallel lines are cut by a transversal. One same-side interior angle is 4x and the other is 2x. Find x.", ["20", "30", "60", "90"], "30", ["Same-side interior angles are supplementary: 4x + 2x = 180 → 6x = 180 → x = 30."], "Same-Side Interior Angles", "Parallel Lines", "medium"),
+    d("The sum of the measures of the interior angles of a triangle is ____.", ["90°", "180°", "360°", "Variable"], "180°", ["Triangle Angle Sum Theorem: interior angles of a triangle sum to 180°."], "Triangle Angle Sum Theorem", "Triangles", "easy"),
+    d("In a triangle, an exterior angle equals the sum of the two ____ interior angles.", ["Adjacent", "Remote (non-adjacent)", "Right", "Congruent"], "Remote (non-adjacent)", ["Exterior Angle Theorem: exterior angle = sum of the two remote interior angles."], "Exterior Angle Theorem", "Triangles", "easy"),
+    d("In an isosceles triangle, the angles opposite the congruent sides are ____.", ["Supplementary", "Complementary", "Congruent", "Right"], "Congruent", ["Isosceles Triangle Theorem: base angles of an isosceles triangle are congruent."], "Isosceles Triangle Theorem", "Triangles", "easy"),
+    d("In a triangle, one angle is 50° and another is 70°. What is the measure of the third angle?", ["50°", "60°", "70°", "120°"], "60°", ["Sum of interior angles = 180°. Third = 180° − 50° − 70° = 60°."], "Triangle Angle Sum Theorem", "Triangles", "easy"),
+    d("Two triangles have two sides and the included angle congruent. What congruence theorem proves the triangles are congruent?", ["SSS", "SAS", "ASA", "AAS"], "SAS", ["Identify two corresponding sides and the included angle; apply Side-Angle-Side (SAS)."], "SAS Congruence", "Congruence", "easy"),
+    d("If two angles and an included side of one triangle are congruent to two angles and the included side of another, which theorem applies?", ["SSS", "SAS", "ASA", "AAS"], "ASA", ["Included side is between the two angles; Angle-Side-Angle (ASA) applies."], "ASA Congruence", "Congruence", "easy"),
+    d("Which congruence theorem applies only to right triangles?", ["SSS", "SAS", "ASA", "HL"], "HL", ["HL: Hypotenuse-Leg. For two right triangles, if the hypotenuse and one leg are congruent, the triangles are congruent."], "HL Congruence", "Congruence", "easy"),
+    d("Two triangles have three pairs of congruent sides. Which theorem proves they are congruent?", ["SAS", "ASA", "SSS", "AAS"], "SSS", ["Three pairs of congruent sides → Side-Side-Side (SSS)."], "SSS Congruence", "Congruence", "easy"),
+    d("If two angles of one triangle are congruent to two angles of another triangle, the triangles are ____.", ["Congruent", "Similar", "Equal in area", "Perpendicular"], "Similar", ["AA Similarity: two pairs of congruent angles imply the triangles are similar."], "AA Similarity", "Similarity", "easy"),
+    d("In similar triangles, corresponding sides are ____.", ["Congruent", "Supplementary", "Proportional", "Parallel"], "Proportional", ["Similar figures have the same shape; corresponding sides are in proportion."], "Similar triangle side ratios", "Similarity", "easy"),
+    d("Two similar triangles have corresponding sides in the ratio 2 : 5. If a side of the smaller triangle is 6, the corresponding side of the larger is ____.", ["2.4", "15", "12", "30"], "15", ["6/x = 2/5 → 2x = 30 → x = 15."], "Similar triangle ratios", "Similarity", "medium"),
+    d("What is the distance between the points (1, 2) and (4, 6)?", ["5", "7", "√13", "√29"], "5", ["Distance: d = √[(4−1)² + (6−2)²] = √[9 + 16] = √25 = 5."], "Distance Formula", "Coordinate Geometry", "easy"),
+    d("Two lines are perpendicular. If one has slope 3, what is the slope of the other?", ["−3", "−1/3", "1/3", "3"], "−1/3", ["Perpendicular slopes are negative reciprocals. Slope 3 → perpendicular slope = −1/3."], "Perpendicular slopes: negative reciprocal", "Coordinate Geometry", "easy"),
+  ];
+}
+
+const cards = [
+  ...baseCards,
+  ...(typeof practiceCards !== "undefined" ? practiceCards : []),
+  ...getGeometryCards(),
+];
+
 const examFilter = document.getElementById("examFilter");
 const typeFilter = document.getElementById("typeFilter");
 const subjectFilter = document.getElementById("subjectFilter");
@@ -1324,6 +1415,34 @@ const correctBtn = document.getElementById("correctBtn");
 const reviewMissedBtn = document.getElementById("reviewMissedBtn");
 const resetTrackingBtn = document.getElementById("resetTrackingBtn");
 const sessionStats = document.getElementById("sessionStats");
+const openTutorBtn = document.getElementById("openTutorBtn");
+const tutorModal = document.getElementById("tutorModal");
+const closeTutorBtn = document.getElementById("closeTutorBtn");
+const tutorCardContext = document.getElementById("tutorCardContext");
+const tutorMessages = document.getElementById("tutorMessages");
+const tutorHintBtn = document.getElementById("tutorHintBtn");
+const tutorWalkthroughBtn = document.getElementById("tutorWalkthroughBtn");
+const tutorCheckWorkBtn = document.getElementById("tutorCheckWorkBtn");
+const tutorModelMode = document.getElementById("tutorModelMode");
+const tutorForm = document.getElementById("tutorForm");
+const tutorInput = document.getElementById("tutorInput");
+const sendTutorBtn = document.getElementById("sendTutorBtn");
+const geometryDiagnosticPanel = document.getElementById("geometryDiagnosticPanel");
+const viewGeometryReportBtn = document.getElementById("viewGeometryReportBtn");
+const exportReportJsonBtn = document.getElementById("exportReportJsonBtn");
+const exportReportMdBtn = document.getElementById("exportReportMdBtn");
+const exportResponsesCsvBtn = document.getElementById("exportResponsesCsvBtn");
+const resetGeometryDiagnosticBtn = document.getElementById("resetGeometryDiagnosticBtn");
+const geometryReportContent = document.getElementById("geometryReportContent");
+const FILTER_QUERY_PARAM_KEYS = {
+  exam: "exam",
+  type: "type",
+  subject: "subject",
+  difficulty: "difficulty",
+  questionType: "questionType",
+};
+const CARD_QUERY_PARAM_KEY = "cardId";
+const TUTOR_API_URL = "http://localhost:8787/api/tutor/chat";
 
 let filteredCards = [...cards];
 let index = 0;
@@ -1332,9 +1451,14 @@ let reviewMissedOnly = false;
 let attempts = 0;
 let correctAttempts = 0;
 let incorrectAttempts = 0;
+let cardViewStartTime = 0;
 const seenIds = new Set();
 const missedIds = new Set();
 const cardResults = new Map();
+const tutorThreads = new Map();
+let tutorIsOpen = false;
+let activeTutorCardId = null;
+let tutorMode = "walkthrough";
 
 function formatDifficulty(value) {
   if (value === "easy") return "Easy";
@@ -1342,12 +1466,383 @@ function formatDifficulty(value) {
   return "Difficult";
 }
 
+function formatCardType(value) {
+  if (value === "concept") return "Concept";
+  if (value === "practice") return "Practice Questions";
+  return "Sample Problem";
+}
+
+function clearFace(faceEl) {
+  faceEl.replaceChildren();
+}
+
+function appendTextBlock(parent, text, className = "face-text") {
+  if (!text) return;
+  const block = document.createElement("p");
+  block.className = className;
+  block.textContent = text;
+  parent.appendChild(block);
+}
+
+function appendImageBlock(parent, src, alt, caption) {
+  if (!src) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = "face-image-wrap";
+
+  const img = document.createElement("img");
+  img.className = "face-image";
+  img.src = src;
+  img.alt = alt || "Flashcard image";
+  img.loading = "lazy";
+  img.addEventListener("error", () => {
+    wrap.replaceChildren();
+    const missing = document.createElement("p");
+    missing.className = "image-missing";
+    missing.textContent =
+      `Image not found: ${src}. Add the image file to this path to show the original question.`;
+    wrap.appendChild(missing);
+  });
+  wrap.appendChild(img);
+
+  if (caption) {
+    const captionEl = document.createElement("p");
+    captionEl.className = "face-image-caption";
+    captionEl.textContent = caption;
+    wrap.appendChild(captionEl);
+  }
+
+  parent.appendChild(wrap);
+}
+
+function renderCardFace(faceEl, card, side) {
+  clearFace(faceEl);
+
+  const body = document.createElement("div");
+  body.className = "face-body";
+
+  if (side === "front") {
+    appendTextBlock(body, card.front);
+    appendImageBlock(body, card.frontImage, card.frontImageAlt, card.frontImageCaption);
+  } else {
+    if (card.answer) {
+      const chip = document.createElement("span");
+      chip.className = "answer-chip";
+      chip.textContent = "Correct Answer";
+      body.appendChild(chip);
+
+      appendTextBlock(body, card.answer, "answer-line");
+
+      const explanationBlock = document.createElement("div");
+      explanationBlock.className = "explanation-block";
+
+      if (card.explanation) {
+        appendTextBlock(explanationBlock, card.explanation, "face-text");
+      } else if (card.back) {
+        appendTextBlock(explanationBlock, card.back, "face-text");
+      }
+
+      if (Array.isArray(card.eliminationNotes) && card.eliminationNotes.length) {
+        const list = document.createElement("ul");
+        list.className = "explanation-list";
+
+        for (const note of card.eliminationNotes) {
+          const item = document.createElement("li");
+          item.textContent = note;
+          list.appendChild(item);
+        }
+
+        explanationBlock.appendChild(list);
+      }
+
+      body.appendChild(explanationBlock);
+      appendImageBlock(body, card.backImage, card.backImageAlt, card.backImageCaption);
+    } else {
+      appendTextBlock(body, card.back);
+      appendImageBlock(body, card.backImage, card.backImageAlt, card.backImageCaption);
+    }
+  }
+
+  faceEl.appendChild(body);
+}
+
+function getCurrentCard() {
+  if (!filteredCards.length) return null;
+  return filteredCards[index] || null;
+}
+
+function getChoiceLinesFromFront(frontText) {
+  if (!frontText) return [];
+  return frontText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => /^[A-E]\./.test(line));
+}
+
+function getThreadForCard(cardId) {
+  if (!tutorThreads.has(cardId)) {
+    tutorThreads.set(cardId, [
+      {
+        role: "system",
+        content:
+          "Tutor ready. Ask for a hint, a full walkthrough, or have me check your work for this question.",
+      },
+    ]);
+  }
+  return tutorThreads.get(cardId);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function formatInlineMarkdown(text) {
+  return text
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+}
+
+function renderTutorMarkdown(content) {
+  const safe = escapeHtml(content || "");
+  const lines = safe.split("\n");
+  const html = [];
+  let listOpen = false;
+  let orderedListOpen = false;
+
+  for (const lineRaw of lines) {
+    const line = lineRaw.trim();
+
+    if (!line) {
+      if (listOpen) {
+        html.push("</ul>");
+        listOpen = false;
+      }
+      if (orderedListOpen) {
+        html.push("</ol>");
+        orderedListOpen = false;
+      }
+      html.push("<br>");
+      continue;
+    }
+
+    const headingMatch = line.match(/^#{1,6}\s+(.*)$/);
+    if (headingMatch) {
+      if (listOpen) {
+        html.push("</ul>");
+        listOpen = false;
+      }
+      if (orderedListOpen) {
+        html.push("</ol>");
+        orderedListOpen = false;
+      }
+      html.push(`<p><strong>${formatInlineMarkdown(headingMatch[1])}</strong></p>`);
+      continue;
+    }
+
+    const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+    if (bulletMatch) {
+      if (!listOpen) {
+        html.push("<ul>");
+        listOpen = true;
+      }
+      html.push(`<li>${formatInlineMarkdown(bulletMatch[1])}</li>`);
+      continue;
+    }
+
+    const orderedMatch = line.match(/^(\d+)\.\s+(.*)$/);
+    if (orderedMatch) {
+      if (listOpen) {
+        html.push("</ul>");
+        listOpen = false;
+      }
+      if (!orderedListOpen) {
+        html.push("<ol>");
+        orderedListOpen = true;
+      }
+      html.push(`<li>${formatInlineMarkdown(orderedMatch[2])}</li>`);
+      continue;
+    }
+
+    if (listOpen) {
+      html.push("</ul>");
+      listOpen = false;
+    }
+    if (orderedListOpen) {
+      html.push("</ol>");
+      orderedListOpen = false;
+    }
+
+    html.push(`<p>${formatInlineMarkdown(line)}</p>`);
+  }
+
+  if (listOpen) {
+    html.push("</ul>");
+  }
+  if (orderedListOpen) {
+    html.push("</ol>");
+  }
+
+  return html.join("");
+}
+
+function ensureTutorCardContextMessage(card) {
+  const thread = getThreadForCard(card.id);
+  const hasContext = thread.some((item) => item.role === "system" && item.content.startsWith("Question context:"));
+  if (hasContext) return;
+
+  const contextMessage =
+    `Question context:\n${card.front || "(no front text)"}\n\n` +
+    `Choices:\n${getChoiceLinesFromFront(card.front || "").join("\n") || "(choices may be shown in image)"}`;
+  thread.push({ role: "system", content: contextMessage });
+}
+
+function appendTutorMessage(role, content) {
+  const msg = document.createElement("div");
+  msg.className = `tutor-msg ${role}`;
+  if (role === "assistant") {
+    msg.innerHTML = renderTutorMarkdown(content);
+  } else {
+    msg.textContent = content;
+  }
+  tutorMessages.appendChild(msg);
+}
+
+function renderTutorMessagesForCard(cardId) {
+  tutorMessages.replaceChildren();
+  const thread = getThreadForCard(cardId);
+  for (const item of thread) {
+    appendTutorMessage(item.role, item.content);
+  }
+  tutorMessages.scrollTop = tutorMessages.scrollHeight;
+}
+
+function setTutorBusy(isBusy) {
+  sendTutorBtn.disabled = isBusy;
+  tutorHintBtn.disabled = isBusy;
+  tutorWalkthroughBtn.disabled = isBusy;
+  tutorCheckWorkBtn.disabled = isBusy;
+  tutorModelMode.disabled = isBusy;
+  if (isBusy) {
+    sendTutorBtn.textContent = "Sending...";
+  } else {
+    sendTutorBtn.textContent = "Send";
+  }
+}
+
+function refreshTutorCardContext() {
+  const card = getCurrentCard();
+  if (!card) {
+    tutorCardContext.textContent = "No card selected";
+    return;
+  }
+
+  tutorCardContext.textContent = `${card.id} | ${card.subject} | ${card.questionType}`;
+  if (tutorIsOpen && activeTutorCardId !== card.id) {
+    activeTutorCardId = card.id;
+    renderTutorMessagesForCard(activeTutorCardId);
+  }
+}
+
+function openTutorModal() {
+  const card = getCurrentCard();
+  if (!card) return;
+  tutorIsOpen = true;
+  activeTutorCardId = card.id;
+  ensureTutorCardContextMessage(card);
+  tutorModal.classList.remove("hidden");
+  refreshTutorCardContext();
+  renderTutorMessagesForCard(activeTutorCardId);
+  tutorInput.focus();
+}
+
+function closeTutorModal() {
+  tutorIsOpen = false;
+  tutorModal.classList.add("hidden");
+}
+
+function buildTutorPayload(card, userMessage, mode) {
+  return {
+    cardId: card.id,
+    mode,
+    modelTier: tutorModelMode.value || "fast",
+    question: {
+      front: card.front || "",
+      choices: getChoiceLinesFromFront(card.front || "").join("\n"),
+      answer: card.answer || "",
+      explanation: card.explanation || card.back || "",
+    },
+    conversation: getThreadForCard(card.id).map((item) => ({
+      role: item.role === "system" ? "assistant" : item.role,
+      content: item.content,
+    })),
+    userMessage,
+  };
+}
+
+async function sendTutorMessage(message, mode = tutorMode) {
+  const card = getCurrentCard();
+  if (!card) return;
+
+  ensureTutorCardContextMessage(card);
+  const thread = getThreadForCard(card.id);
+  thread.push({ role: "user", content: message });
+  thread.push({ role: "assistant", content: "" });
+  renderTutorMessagesForCard(card.id);
+  setTutorBusy(true);
+
+  try {
+    const response = await fetch(TUTOR_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildTutorPayload(card, message, mode)),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`Tutor API returned ${response.status}: ${detail || "no details"}`);
+    }
+    if (!response.body) {
+      throw new Error("Tutor API returned no response body");
+    }
+
+    const decoder = new TextDecoder();
+    const reader = response.body.getReader();
+    let streamReply = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      streamReply += decoder.decode(value, { stream: true });
+      thread[thread.length - 1].content = streamReply;
+      renderTutorMessagesForCard(card.id);
+    }
+
+    streamReply = streamReply.trim();
+    if (!streamReply) {
+      thread[thread.length - 1].content = "I could not generate a reply.";
+      renderTutorMessagesForCard(card.id);
+    }
+  } catch (error) {
+    thread[thread.length - 1].content = `Tutor error: ${error?.message || "Unknown error"}`;
+  } finally {
+    setTutorBusy(false);
+    renderTutorMessagesForCard(card.id);
+  }
+}
+
 function passesBaseFilters(card) {
   const examPass =
     examFilter.value === "all" ||
     card.exam === examFilter.value ||
     (examFilter.value === "ACT" && card.exam === "Both") ||
-    (examFilter.value === "SAT" && card.exam === "Both");
+    (examFilter.value === "SAT" && card.exam === "Both") ||
+    (examFilter.value === "HSGeometry" && card.exam === "HSGeometry");
 
   const typePass = typeFilter.value === "all" || card.type === typeFilter.value;
   const subjectPass = subjectFilter.value === "all" || card.subject === subjectFilter.value;
@@ -1372,6 +1867,69 @@ function refreshQuestionTypeOptions() {
   }
 
   questionTypeFilter.value = types.includes(currentValue) ? currentValue : "all";
+}
+
+function setSelectFromQuery(selectEl, paramValue) {
+  if (!paramValue) return;
+  const validValues = Array.from(selectEl.options).map((option) => option.value);
+  if (validValues.includes(paramValue)) {
+    selectEl.value = paramValue;
+  }
+}
+
+function syncFiltersToUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const filterParams = [
+    [FILTER_QUERY_PARAM_KEYS.exam, examFilter.value],
+    [FILTER_QUERY_PARAM_KEYS.type, typeFilter.value],
+    [FILTER_QUERY_PARAM_KEYS.subject, subjectFilter.value],
+    [FILTER_QUERY_PARAM_KEYS.difficulty, difficultyFilter.value],
+    [FILTER_QUERY_PARAM_KEYS.questionType, questionTypeFilter.value],
+  ];
+
+  for (const [key, value] of filterParams) {
+    if (!value || value === "all") {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+  }
+
+  const currentCard = filteredCards[index];
+  if (currentCard && currentCard.id) {
+    params.set(CARD_QUERY_PARAM_KEY, currentCard.id);
+  } else {
+    params.delete(CARD_QUERY_PARAM_KEY);
+  }
+
+  const nextSearch = params.toString();
+  const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, "", nextUrl);
+}
+
+function applyFiltersFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedCardId = params.get(CARD_QUERY_PARAM_KEY);
+
+  setSelectFromQuery(examFilter, params.get(FILTER_QUERY_PARAM_KEYS.exam));
+  setSelectFromQuery(typeFilter, params.get(FILTER_QUERY_PARAM_KEYS.type));
+  setSelectFromQuery(subjectFilter, params.get(FILTER_QUERY_PARAM_KEYS.subject));
+  setSelectFromQuery(difficultyFilter, params.get(FILTER_QUERY_PARAM_KEYS.difficulty));
+
+  refreshQuestionTypeOptions();
+  setSelectFromQuery(questionTypeFilter, params.get(FILTER_QUERY_PARAM_KEYS.questionType));
+  buildFilteredCards();
+
+  if (requestedCardId) {
+    const requestedIndex = filteredCards.findIndex((card) => card.id === requestedCardId);
+    if (requestedIndex >= 0) {
+      index = requestedIndex;
+      renderCard();
+    }
+  }
+
+  syncFiltersToUrl();
+  updateGeometryPanelVisibility();
 }
 
 function buildFilteredCards() {
@@ -1402,13 +1960,29 @@ function renderCard() {
     if (reviewMissedOnly && missedIds.size === 0) {
       cardMeta.textContent = "Review mode is on. No missed cards left.";
       cardAttributes.textContent = "";
-      cardFront.textContent = "Great work. You currently have no missed questions to review.";
-      cardBack.textContent = "Turn off review mode or keep studying new cards.";
+      renderCardFace(
+        cardFront,
+        { front: "Great work. You currently have no missed questions to review." },
+        "front"
+      );
+      renderCardFace(
+        cardBack,
+        { back: "Turn off review mode or keep studying new cards." },
+        "back"
+      );
     } else {
       cardMeta.textContent = "No cards match these filters.";
       cardAttributes.textContent = "";
-      cardFront.textContent = "Try changing exam, subject, card type, or difficulty.";
-      cardBack.textContent = "You can also disable missed-only review mode.";
+      renderCardFace(
+        cardFront,
+        { front: "Try changing exam, subject, card type, or difficulty." },
+        "front"
+      );
+      renderCardFace(
+        cardBack,
+        { back: "You can also disable missed-only review mode." },
+        "back"
+      );
     }
 
     prevBtn.disabled = true;
@@ -1416,35 +1990,83 @@ function renderCard() {
     shuffleBtn.disabled = true;
     incorrectBtn.disabled = true;
     correctBtn.disabled = true;
+    syncFiltersToUrl();
+    refreshTutorCardContext();
     return;
   }
 
   const current = filteredCards[index];
+  cardViewStartTime = Date.now();
   const result = cardResults.get(current.id) || "unanswered";
   const modeLabel = reviewMissedOnly ? " | Missed Review" : "";
 
   cardMeta.textContent = `${index + 1} / ${filteredCards.length} | ${current.exam} | ${
     current.subject
-  } | ${current.type === "concept" ? "Concept" : "Sample Problem"} | Last: ${result}${modeLabel}`;
+  } | ${formatCardType(current.type)} | Last: ${result}${modeLabel}`;
 
+  const sourceLabel = current.source ? ` | Source: ${current.source}` : "";
   cardAttributes.textContent = `Difficulty: ${formatDifficulty(current.difficulty)} | Question Type: ${
     current.questionType
-  } | Focus: ${current.focus.join(", ")}`;
+  } | Focus: ${current.focus.join(", ")}${sourceLabel}`;
 
-  cardFront.textContent = current.front;
-  cardBack.textContent = current.back;
+  renderCardFace(cardFront, current, "front");
+  renderCardFace(cardBack, current, "back");
 
   prevBtn.disabled = false;
   nextBtn.disabled = false;
   shuffleBtn.disabled = false;
   incorrectBtn.disabled = false;
   correctBtn.disabled = false;
+  syncFiltersToUrl();
+  refreshTutorCardContext();
 }
 
 function applyFilters() {
   index = 0;
   refreshQuestionTypeOptions();
   buildFilteredCards();
+  updateGeometryPanelVisibility();
+}
+
+function updateGeometryPanelVisibility() {
+  if (!geometryDiagnosticPanel) return;
+  geometryDiagnosticPanel.classList.toggle("hidden", examFilter.value !== "HSGeometry");
+}
+
+let lastGeometryReport = null;
+let lastGeometryStudyPlan = null;
+
+function renderGeometryReportContent() {
+  if (!geometryReportContent || typeof GeometryAssessment === "undefined") return;
+  const responses = GeometryAssessment.getStoredResponses();
+  const idToCard = {};
+  cards.filter((c) => c.exam === "HSGeometry").forEach((c) => { idToCard[c.id] = c; });
+  const report = GeometryAssessment.generateReport(responses, idToCard);
+  const studyPlan = GeometryAssessment.generateStudyPlan(report);
+  lastGeometryReport = report;
+  lastGeometryStudyPlan = studyPlan;
+
+  const pct = (a) => (a.pct * 100).toFixed(0) + "%";
+  let html = "<h4>Student Geometry Diagnostic Report</h4>";
+  html += "<p><strong>Responses recorded:</strong> " + responses.length + "</p>";
+  html += "<section class=\"report-section\"><h5>Strengths (&gt;80%)</h5><ul>";
+  (report.strengths || []).forEach((a) => { html += "<li>" + a.topic + ": " + pct(a) + "</li>"; });
+  html += "</ul></section>";
+  html += "<section class=\"report-section\"><h5>Developing (60–80%)</h5><ul>";
+  (report.developing || []).forEach((a) => { html += "<li>" + a.topic + ": " + pct(a) + "</li>"; });
+  html += "</ul></section>";
+  html += "<section class=\"report-section\"><h5>Needs Work (40–60%)</h5><ul>";
+  (report.needsWork || []).forEach((a) => { html += "<li>" + a.topic + ": " + pct(a) + "</li>"; });
+  html += "</ul></section>";
+  html += "<section class=\"report-section\"><h5>Major Gaps (&lt;40%)</h5><ul>";
+  (report.majorGaps || []).forEach((a) => { html += "<li>" + a.topic + ": " + pct(a) + "</li>"; });
+  html += "</ul></section>";
+  html += "<h5>Recommended Study Plan</h5><table class=\"study-plan-table\"><thead><tr><th>Week</th><th>Topic</th><th>Concept</th><th>Practice</th><th>Time</th><th>Priority</th></tr></thead><tbody>";
+  (studyPlan || []).forEach((r) => {
+    html += "<tr><td>" + r.week + "</td><td>" + r.topic + "</td><td>" + r.concept + "</td><td>" + (r.practiceRecommendation || "") + "</td><td>" + (r.estimatedTime || "") + "</td><td>" + (r.priorityLevel || "") + "</td></tr>";
+  });
+  html += "</tbody></table>";
+  geometryReportContent.innerHTML = html;
 }
 
 function nextCard() {
@@ -1489,6 +2111,19 @@ function markCard(isCorrect) {
     cardResults.set(current.id, "missed");
   }
 
+  if (current.exam === "HSGeometry" && typeof GeometryAssessment !== "undefined") {
+    const timeToAnswer = Math.round((Date.now() - cardViewStartTime) / 1000);
+    GeometryAssessment.recordResponse({
+      studentId: GeometryAssessment.getOrCreateStudentId(),
+      questionId: current.id,
+      response: isCorrect ? (current.correctAnswer || current.answer) : "incorrect",
+      correct: isCorrect,
+      timeToAnswer,
+      conceptTag: current.topic || current.questionType || "Geometry",
+      topic: current.topic || current.questionType,
+    });
+  }
+
   updateSessionStats();
 
   if (reviewMissedOnly) {
@@ -1531,9 +2166,59 @@ shuffleBtn.addEventListener("click", shuffleCards);
 flashcard.addEventListener("click", () => flashcard.classList.toggle("flipped"));
 incorrectBtn.addEventListener("click", () => markCard(false));
 correctBtn.addEventListener("click", () => markCard(true));
+if (exportReportJsonBtn) exportReportJsonBtn.addEventListener("click", () => {
+  if (typeof GeometryAssessment === "undefined") return;
+  if (!lastGeometryReport || !lastGeometryStudyPlan) renderGeometryReportContent();
+  const blob = new Blob([GeometryAssessment.exportReportJson(lastGeometryReport, lastGeometryStudyPlan)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "geometry-diagnostic-report.json"; a.click(); URL.revokeObjectURL(a.href);
+});
+if (exportReportMdBtn) exportReportMdBtn.addEventListener("click", () => {
+  if (typeof GeometryAssessment === "undefined") return;
+  if (!lastGeometryReport || !lastGeometryStudyPlan) renderGeometryReportContent();
+  const blob = new Blob([GeometryAssessment.exportReportMarkdown(lastGeometryReport, lastGeometryStudyPlan, GeometryAssessment.getOrCreateStudentId())], { type: "text/markdown" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "geometry-diagnostic-report.md"; a.click(); URL.revokeObjectURL(a.href);
+});
+if (exportResponsesCsvBtn) exportResponsesCsvBtn.addEventListener("click", () => {
+  if (typeof GeometryAssessment === "undefined") return;
+  const blob = new Blob([GeometryAssessment.exportResponsesCsv()], { type: "text/csv" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "geometry-responses.csv"; a.click(); URL.revokeObjectURL(a.href);
+});
+if (viewGeometryReportBtn) viewGeometryReportBtn.addEventListener("click", () => renderGeometryReportContent());
+if (resetGeometryDiagnosticBtn) resetGeometryDiagnosticBtn.addEventListener("click", () => {
+  if (typeof GeometryAssessment === "undefined") return;
+  GeometryAssessment.resetDiagnostic({ clearSessions: false });
+  lastGeometryReport = null;
+  lastGeometryStudyPlan = null;
+  if (geometryReportContent) geometryReportContent.innerHTML = "";
+});
 reviewMissedBtn.addEventListener("click", toggleReviewMissed);
 resetTrackingBtn.addEventListener("click", resetTracking);
+openTutorBtn.addEventListener("click", openTutorModal);
+closeTutorBtn.addEventListener("click", closeTutorModal);
+tutorModal.addEventListener("click", (event) => {
+  if (event.target === tutorModal) {
+    closeTutorModal();
+  }
+});
+tutorForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const message = tutorInput.value.trim();
+  if (!message) return;
+  tutorInput.value = "";
+  await sendTutorMessage(message, tutorMode);
+});
+tutorHintBtn.addEventListener("click", async () => {
+  tutorMode = "hint";
+  await sendTutorMessage("Give me a hint only for this question.", "hint");
+});
+tutorWalkthroughBtn.addEventListener("click", async () => {
+  tutorMode = "walkthrough";
+  await sendTutorMessage("Explain this question step by step.", "walkthrough");
+});
+tutorCheckWorkBtn.addEventListener("click", async () => {
+  tutorMode = "check_work";
+  await sendTutorMessage("Check my work approach and point out the first mistake.", "check_work");
+});
 
 updateSessionStats();
-refreshQuestionTypeOptions();
-buildFilteredCards();
+applyFiltersFromUrl();

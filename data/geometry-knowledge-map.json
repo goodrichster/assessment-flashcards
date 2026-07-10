@@ -1,0 +1,82 @@
+{
+  "examType": "H.S. Geometry Assessment",
+  "gradeLevel": "High School (Geometry)",
+  "purpose": "Diagnostic + Progress Monitoring",
+  "scope": "First 5 months of a Geometry course",
+  "conceptMap": [
+    {
+      "id": "basic-definitions",
+      "conceptName": "Basic Definitions",
+      "requiredPriorConcepts": [],
+      "keyTheorems": ["Definitions of point, line, plane", "Segment and ray", "Angle and measure", "Perpendicular and parallel definitions"],
+      "coreSkills": ["Identify and name points, lines, planes", "Distinguish segment vs ray", "Classify angles by measure", "Recognize perpendicular and parallel"],
+      "exampleProblems": ["Name the vertex of angle ABC", "Identify a pair of parallel lines in a diagram", "Is this angle acute or obtuse?"]
+    },
+    {
+      "id": "angle-relationships",
+      "conceptName": "Angle Relationships",
+      "requiredPriorConcepts": ["basic-definitions"],
+      "keyTheorems": ["Vertical Angles Theorem", "Linear Pair Postulate", "Supplementary Angles", "Complementary Angles"],
+      "coreSkills": ["Find vertical angles", "Use linear pairs to find missing angles", "Apply supplementary and complementary relationships"],
+      "exampleProblems": ["If two lines intersect and one angle is 40°, find the other three", "Two angles are supplementary; one is 2x, the other 3x. Find x."]
+    },
+    {
+      "id": "parallel-lines-transversals",
+      "conceptName": "Parallel Lines & Transversals",
+      "requiredPriorConcepts": ["basic-definitions", "angle-relationships"],
+      "keyTheorems": ["Alternate Interior Angles", "Alternate Exterior Angles", "Corresponding Angles", "Same-Side Interior Angles"],
+      "coreSkills": ["Identify angle pairs when a transversal cuts parallel lines", "Use congruence/supplement to find missing angles"],
+      "exampleProblems": ["Given parallel lines and a transversal, find all angle measures", "Prove two lines are parallel using angle relationships"]
+    },
+    {
+      "id": "triangle-properties",
+      "conceptName": "Triangle Properties",
+      "requiredPriorConcepts": ["basic-definitions", "angle-relationships"],
+      "keyTheorems": ["Triangle Angle Sum Theorem", "Exterior Angle Theorem", "Isosceles Triangle Theorem"],
+      "coreSkills": ["Find missing interior or exterior angles", "Apply base angles of isosceles triangles"],
+      "exampleProblems": ["Find the third angle given two angles", "In an isosceles triangle with vertex angle 80°, find base angles"]
+    },
+    {
+      "id": "triangle-congruence",
+      "conceptName": "Triangle Congruence",
+      "requiredPriorConcepts": ["triangle-properties"],
+      "keyTheorems": ["SSS", "SAS", "ASA", "AAS", "HL"],
+      "coreSkills": ["Identify which congruence theorem applies", "Mark diagrams and write congruence statements"],
+      "exampleProblems": ["Given two sides and included angle, name the congruence theorem", "Determine if triangles are congruent and state the shortcut"]
+    },
+    {
+      "id": "similarity",
+      "conceptName": "Triangle Similarity",
+      "requiredPriorConcepts": ["triangle-congruence", "triangle-properties"],
+      "keyTheorems": ["AA Similarity", "Triangle proportionality", "Similar triangle side ratios"],
+      "coreSkills": ["Establish similarity with AA", "Set up and solve proportions from similar figures"],
+      "exampleProblems": ["Prove two triangles similar by AA", "Find a missing side using a proportion"]
+    },
+    {
+      "id": "coordinate-geometry",
+      "conceptName": "Coordinate Geometry",
+      "requiredPriorConcepts": ["basic-definitions"],
+      "keyTheorems": ["Distance Formula", "Midpoint Formula", "Slope", "Parallel slopes (equal)", "Perpendicular slopes (negative reciprocal)"],
+      "coreSkills": ["Compute distance and midpoint", "Find slope and use it for parallel/perpendicular lines"],
+      "exampleProblems": ["Find the distance between (1,2) and (5,5)", "Find the slope of a line perpendicular to y = 2x + 3"]
+    },
+    {
+      "id": "area-relationships",
+      "conceptName": "Area Relationships",
+      "requiredPriorConcepts": ["basic-definitions", "triangle-properties"],
+      "keyTheorems": ["Area of triangle: (1/2)bh", "Area of parallelogram: bh", "Area of trapezoid: (1/2)(b1+b2)h"],
+      "coreSkills": ["Apply area formulas", "Relate triangle area to parallelogram (half)"],
+      "exampleProblems": ["Find area of a triangle with base 10 and height 6", "Find area of a trapezoid with bases 8 and 12, height 5"]
+    }
+  ],
+  "dependencyOrder": [
+    "basic-definitions",
+    "angle-relationships",
+    "parallel-lines-transversals",
+    "triangle-properties",
+    "triangle-congruence",
+    "similarity",
+    "coordinate-geometry",
+    "area-relationships"
+  ]
+}
