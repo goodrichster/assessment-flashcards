@@ -10,11 +10,11 @@ const baseCards = [
     focus: ["right triangles", "inverse trig", "opposite/hypotenuse"],
     source: "ACT Practice Test",
     front: "Image-based problem: Which inverse trig expression gives the angle of inclination of the ramp?",
-    frontImage: "images/ramp-angle-question.png",
+    frontImage: "images/ramp-angle-question.svg",
     frontImageAlt:
       "ACT-style math question screenshot showing a ramp triangle with ramp length 11.5 feet and height 3 feet plus multiple-choice inverse trig expressions.",
     frontImageCaption:
-      "Place the screenshot at images/ramp-angle-question.png to display the original problem image.",
+      "Ramp diagram reconstructed from the dimensions stated in the question.",
     answer: "sin^-1(3/11.5)",
     explanation:
       "The 11.5-foot ramp is the hypotenuse and the 3-foot vertical rise is the side opposite the angle at the ground. That gives sin(theta) = opposite / hypotenuse = 3 / 11.5, so theta = sin^-1(3/11.5).",
@@ -116,7 +116,7 @@ const baseCards = [
   },
   {
     id: "m-9",
-    exam: "ACT",
+    exam: "Both",
     subject: "Math",
     type: "problem",
     questionType: "Geometry - Triangles",
@@ -584,7 +584,7 @@ const baseCards = [
   },
   {
     id: "m-15",
-    exam: "ACT",
+    exam: "Both",
     subject: "Math",
     type: "problem",
     questionType: "Geometry - Circles",
@@ -628,7 +628,7 @@ const baseCards = [
   },
   {
     id: "m-19",
-    exam: "ACT",
+    exam: "Both",
     subject: "Math",
     type: "problem",
     questionType: "Trigonometry",
@@ -1397,10 +1397,42 @@ const cards = [
   ...getGeometryCards(),
 ];
 
+const SAT_MATH_DOMAIN_BY_QUESTION_TYPE = Object.freeze({
+  "Linear Equations": "Algebra",
+  "Systems of Equations": "Algebra",
+  Inequalities: "Algebra",
+  "Coordinate Geometry": "Algebra",
+  Functions: "Advanced Math",
+  Quadratics: "Advanced Math",
+  "Exponent Rules": "Advanced Math",
+  Radicals: "Advanced Math",
+  "Quadratic Vertex": "Advanced Math",
+  "Absolute Value Equations": "Advanced Math",
+  "Rational Expressions": "Advanced Math",
+  "Exponential Growth and Decay": "Advanced Math",
+  "Percent & Proportion": "Problem-Solving and Data Analysis",
+  Statistics: "Problem-Solving and Data Analysis",
+  "Word Problems": "Problem-Solving and Data Analysis",
+  Probability: "Problem-Solving and Data Analysis",
+  Ratios: "Problem-Solving and Data Analysis",
+  "Geometry - Triangles": "Geometry and Trigonometry",
+  "Geometry - Circles": "Geometry and Trigonometry",
+  Trigonometry: "Geometry and Trigonometry",
+});
+
+function getSatMathDomain(card) {
+  if (!card || card.subject !== "Math" || !["SAT", "Both"].includes(card.exam)) {
+    return "";
+  }
+
+  return card.satDomain || SAT_MATH_DOMAIN_BY_QUESTION_TYPE[card.questionType] || "";
+}
+
 const examFilter = document.getElementById("examFilter");
 const typeFilter = document.getElementById("typeFilter");
 const subjectFilter = document.getElementById("subjectFilter");
 const difficultyFilter = document.getElementById("difficultyFilter");
+const satDomainFilter = document.getElementById("satDomainFilter");
 const questionTypeFilter = document.getElementById("questionTypeFilter");
 const cardMeta = document.getElementById("cardMeta");
 const cardAttributes = document.getElementById("cardAttributes");
@@ -1439,6 +1471,7 @@ const FILTER_QUERY_PARAM_KEYS = {
   type: "type",
   subject: "subject",
   difficulty: "difficulty",
+  satDomain: "satDomain",
   questionType: "questionType",
 };
 const CARD_QUERY_PARAM_KEY = "cardId";
@@ -1476,11 +1509,30 @@ function clearFace(faceEl) {
   faceEl.replaceChildren();
 }
 
+const EXPONENT_PATTERN = /\^(?:\(([^()\n]+)\)|([+-]?(?:\d+|[A-Za-z])))/g;
+
+function appendMathFormattedText(parent, text) {
+  const value = String(text);
+  let cursor = 0;
+
+  for (const match of value.matchAll(EXPONENT_PATTERN)) {
+    parent.appendChild(document.createTextNode(value.slice(cursor, match.index)));
+
+    const superscript = document.createElement("sup");
+    superscript.textContent = match[1] || match[2];
+    parent.appendChild(superscript);
+
+    cursor = match.index + match[0].length;
+  }
+
+  parent.appendChild(document.createTextNode(value.slice(cursor)));
+}
+
 function appendTextBlock(parent, text, className = "face-text") {
   if (!text) return;
   const block = document.createElement("p");
   block.className = className;
-  block.textContent = text;
+  appendMathFormattedText(block, text);
   parent.appendChild(block);
 }
 
@@ -1495,6 +1547,7 @@ function appendImageBlock(parent, src, alt, caption) {
   img.src = src;
   img.alt = alt || "Flashcard image";
   img.loading = "lazy";
+  img.decoding = "async";
   img.addEventListener("error", () => {
     wrap.replaceChildren();
     const missing = document.createElement("p");
@@ -1548,7 +1601,7 @@ function renderCardFace(faceEl, card, side) {
 
         for (const note of card.eliminationNotes) {
           const item = document.createElement("li");
-          item.textContent = note;
+          appendMathFormattedText(item, note);
           list.appendChild(item);
         }
 
@@ -1836,6 +1889,17 @@ async function sendTutorMessage(message, mode = tutorMode) {
   }
 }
 
+function updateSatDomainFilterState() {
+  const examSupportsSatDomains = ["all", "SAT", "Both"].includes(examFilter.value);
+  const subjectSupportsSatDomains = ["all", "Math"].includes(subjectFilter.value);
+  const isEnabled = examSupportsSatDomains && subjectSupportsSatDomains;
+
+  satDomainFilter.disabled = !isEnabled;
+  if (!isEnabled) {
+    satDomainFilter.value = "all";
+  }
+}
+
 function passesBaseFilters(card) {
   const examPass =
     examFilter.value === "all" ||
@@ -1849,8 +1913,11 @@ function passesBaseFilters(card) {
   const difficultyPass =
     difficultyFilter.value === "all" || card.difficulty === difficultyFilter.value;
   const reviewPass = !reviewMissedOnly || missedIds.has(card.id);
+  const satDomainPass =
+    satDomainFilter.value === "all" ||
+    getSatMathDomain(card) === satDomainFilter.value;
 
-  return examPass && typePass && subjectPass && difficultyPass && reviewPass;
+  return examPass && typePass && subjectPass && difficultyPass && reviewPass && satDomainPass;
 }
 
 function refreshQuestionTypeOptions() {
@@ -1884,6 +1951,7 @@ function syncFiltersToUrl() {
     [FILTER_QUERY_PARAM_KEYS.type, typeFilter.value],
     [FILTER_QUERY_PARAM_KEYS.subject, subjectFilter.value],
     [FILTER_QUERY_PARAM_KEYS.difficulty, difficultyFilter.value],
+    [FILTER_QUERY_PARAM_KEYS.satDomain, satDomainFilter.value],
     [FILTER_QUERY_PARAM_KEYS.questionType, questionTypeFilter.value],
   ];
 
@@ -1915,6 +1983,8 @@ function applyFiltersFromUrl() {
   setSelectFromQuery(typeFilter, params.get(FILTER_QUERY_PARAM_KEYS.type));
   setSelectFromQuery(subjectFilter, params.get(FILTER_QUERY_PARAM_KEYS.subject));
   setSelectFromQuery(difficultyFilter, params.get(FILTER_QUERY_PARAM_KEYS.difficulty));
+  updateSatDomainFilterState();
+  setSelectFromQuery(satDomainFilter, params.get(FILTER_QUERY_PARAM_KEYS.satDomain));
 
   refreshQuestionTypeOptions();
   setSelectFromQuery(questionTypeFilter, params.get(FILTER_QUERY_PARAM_KEYS.questionType));
@@ -2005,9 +2075,11 @@ function renderCard() {
   } | ${formatCardType(current.type)} | Last: ${result}${modeLabel}`;
 
   const sourceLabel = current.source ? ` | Source: ${current.source}` : "";
+  const satDomain = getSatMathDomain(current);
+  const satDomainLabel = satDomain ? ` | SAT Domain: ${satDomain}` : "";
   cardAttributes.textContent = `Difficulty: ${formatDifficulty(current.difficulty)} | Question Type: ${
     current.questionType
-  } | Focus: ${current.focus.join(", ")}${sourceLabel}`;
+  } | Focus: ${current.focus.join(", ")}${satDomainLabel}${sourceLabel}`;
 
   renderCardFace(cardFront, current, "front");
   renderCardFace(cardBack, current, "back");
@@ -2023,6 +2095,7 @@ function renderCard() {
 
 function applyFilters() {
   index = 0;
+  updateSatDomainFilterState();
   refreshQuestionTypeOptions();
   buildFilteredCards();
   updateGeometryPanelVisibility();
@@ -2159,6 +2232,7 @@ examFilter.addEventListener("change", applyFilters);
 typeFilter.addEventListener("change", applyFilters);
 subjectFilter.addEventListener("change", applyFilters);
 difficultyFilter.addEventListener("change", applyFilters);
+satDomainFilter.addEventListener("change", applyFilters);
 questionTypeFilter.addEventListener("change", applyFilters);
 nextBtn.addEventListener("click", nextCard);
 prevBtn.addEventListener("click", prevCard);

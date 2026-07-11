@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" role="img" aria-labelledby="title desc">
+  <title id="title">Ramp inclination right triangle</title>
+  <desc id="desc">A right triangle with an 11.5 foot ramp as the hypotenuse and a 3 foot vertical rise opposite the angle theta.</desc>
+  <rect width="760" height="420" rx="28" fill="#fffdf7"/>
+  <path d="M110 330H650" stroke="#132238" stroke-width="8" stroke-linecap="round"/>
+  <path d="M610 330V135" stroke="#132238" stroke-width="8" stroke-linecap="round"/>
+  <path d="M110 330L610 135" stroke="#e84a2f" stroke-width="14" stroke-linecap="round"/>
+  <path d="M570 330V290H610" fill="none" stroke="#132238" stroke-width="5"/>
+  <path d="M175 330A65 65 0 0 1 169 306" fill="none" stroke="#2e688f" stroke-width="6"/>
+  <text x="178" y="304" fill="#2e688f" font-family="Arial, sans-serif" font-size="32" font-weight="700">θ</text>
+  <text x="327" y="207" fill="#9f321f" font-family="Arial, sans-serif" font-size="30" font-weight="700" transform="rotate(-21 327 207)">11.5 ft ramp</text>
+  <text x="628" y="245" fill="#132238" font-family="Arial, sans-serif" font-size="28" font-weight="700">3 ft</text>
+  <text x="110" y="380" fill="#586575" font-family="Arial, sans-serif" font-size="24">ground</text>
+</svg>
