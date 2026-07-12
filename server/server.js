@@ -3,8 +3,8 @@ const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 8787;
-const FAST_MODEL = process.env.OLLAMA_FAST_MODEL || process.env.OLLAMA_MODEL || "qwen3:8b";
-const DEEP_MODEL = process.env.OLLAMA_DEEP_MODEL || "qwen3:8b";
+const FAST_MODEL = process.env.OLLAMA_FAST_MODEL || process.env.OLLAMA_MODEL || "llama3.2:3b";
+const DEEP_MODEL = process.env.OLLAMA_DEEP_MODEL || "llama3.2:3b";
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434/api/chat";
 
 const SYSTEM_PROMPT = `You are Assessment Tutor, a concise math tutor for ACT/SAT-style multiple-choice questions.
@@ -199,9 +199,12 @@ app.post("/api/tutor/chat", async (req, res) => {
 
     return res.end();
   } catch (error) {
-    return res.status(500).json({
+    const cause = error?.cause?.message || error?.cause?.code || "";
+    const detail = [String(error), cause].filter(Boolean).join(": ");
+    return res.status(503).json({
       error: "Tutor service unavailable",
-      detail: String(error),
+      detail,
+      help: `Confirm Ollama is running at ${OLLAMA_URL} and the '${resolveModel(req.body?.modelTier)}' model is installed.`,
     });
   }
 });

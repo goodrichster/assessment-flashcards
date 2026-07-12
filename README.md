@@ -1,59 +1,67 @@
 # Assessment Flashcards
 
-A lightweight, single-page web app for drilling ACT/SAT flashcards across Math, Reading, Writing, and Science.
+A single-page app for drilling ACT/SAT flashcards across Math, Reading, Writing, English, and Science.
 
 ## Overview
 
-This project is a static front-end prototype built with plain HTML, CSS, and JavaScript.
-
-- No backend
-- No bundler or framework
-- No external runtime dependencies
+The frontend uses plain HTML, CSS, and JavaScript. An optional local Node/Express Assessment Tutor API connects the app to Ollama.
 
 The app supports:
 
-- Flashcard flip interaction
-- Navigation (`Previous`, `Next`, `Shuffle`)
-- Filtering by exam, subject, difficulty, card type, and question type
-- Session self-grading (`I Got It Right`, `I Missed This`)
-- Missed-only review mode
-- Session tracking stats (attempts, accuracy, unique seen, missed queue)
+- Flashcard questions, answers, explanations, and diagrams
+- Filters for exam, subject, difficulty, card type, and question type
+- Randomized SAT coefficients and constants within each problem's intended magnitude
+- Session self-grading and missed-question review
+- Persistent browser tracking, diagnostic reports, and exports
+- A local AI tutor for hints, step-by-step help, and work checking
 
 ## Project Structure
 
-- `index.html`: App markup and control layout
-- `styles.css`: Visual design, responsive behavior, flip card styling
-- `app.js`: Card dataset + all filtering, navigation, tracking, and rendering logic
-- `ARCHITECTURE.md`: Detailed architecture and data flow notes
+- `index.html`: app markup and controls
+- `styles.css`: responsive layout and visual design
+- `app.js`: filtering, navigation, tracking, randomized variants, and rendering
+- `data/`: SAT/ACT and geometry card data
+- `geometry-assessment.js`: diagnostic scoring, reporting, and exports
+- `server/`: local Assessment Tutor API
+- `run-project.sh`: starts the tutor API and static web server together
 
 ## Run Locally
-
-Because this is a static app, you can open `index.html` directly or run a local server.
-
-### Option 1: Open directly
-
-Open `index.html` in a browser.
-
-### Option 2: Local HTTP server
 
 From the project root:
 
 ```bash
-python3 -m http.server 8000
+./run-project.sh
 ```
 
-Then open `http://localhost:8000`.
+The flashcards run at `http://localhost:8000`, and the tutor API runs at `http://localhost:8787`.
+
+To use another web port, pass it as the first argument:
+
+```bash
+./run-project.sh 8080
+```
+
+The launcher installs the tutor server dependencies if needed. Press `Ctrl+C` to stop both servers.
+
+## Assessment Tutor
+
+The tutor server is started by this command, which is now included in `run-project.sh`:
+
+```bash
+npm --prefix server start
+```
+
+Tutor responses require Ollama and the configured model. In another terminal, run:
+
+```bash
+ollama serve
+ollama pull llama3.2:3b
+```
+
+The Ollama endpoint and model can be changed with `OLLAMA_URL` and `OLLAMA_MODEL`. The tutor API port can be changed with `TUTOR_PORT`.
 
 ## Current Limitations
 
-- Session state is in-memory only (resets on refresh)
-- Card bank is embedded directly in `app.js`
-- No automated tests yet
-- No CI/CD configuration yet
-
-## Next Milestones
-
-- Move card content into external JSON
-- Add local persistence (e.g., `localStorage`) for progress
-- Split logic into modules and add test coverage
-- Add deployment workflow (GitHub Pages or similar)
+- Progress is stored in the current browser's local storage.
+- AI tutor responses require a locally running Ollama model.
+- Illustrated source data remains page-based rather than one object per question.
