@@ -1434,6 +1434,7 @@ const subjectFilter = document.getElementById("subjectFilter");
 const difficultyFilter = document.getElementById("difficultyFilter");
 const satDomainFilter = document.getElementById("satDomainFilter");
 const questionTypeFilter = document.getElementById("questionTypeFilter");
+const filterSummary = document.getElementById("filterSummary");
 const cardMeta = document.getElementById("cardMeta");
 const cardAttributes = document.getElementById("cardAttributes");
 const flashcard = document.getElementById("flashcard");
@@ -2028,7 +2029,29 @@ function applyFiltersFromUrl() {
   updateGeometryPanelVisibility();
 }
 
+function getSelectedFilterLabel(selectElement) {
+  if (!selectElement || selectElement.disabled || selectElement.value === "all") return "";
+  return selectElement.selectedOptions[0]?.textContent || "";
+}
+
+function updateFilterSummary() {
+  if (!filterSummary) return;
+  const labels = [
+    examFilter,
+    typeFilter,
+    subjectFilter,
+    difficultyFilter,
+    satDomainFilter,
+    questionTypeFilter,
+  ]
+    .map(getSelectedFilterLabel)
+    .filter(Boolean);
+
+  filterSummary.textContent = labels.length ? labels.join(" · ") : "All cards";
+}
+
 function buildFilteredCards() {
+  updateFilterSummary();
   filteredCards = cards.filter((card) => {
     const questionTypePass =
       questionTypeFilter.value === "all" || card.questionType === questionTypeFilter.value;

@@ -23,71 +23,161 @@ body {
 }
 
 .app {
-  max-width: 880px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 2.2rem 1.1rem 2.8rem;
+  padding: 1.1rem 1rem 2.4rem;
 }
 
-.hero {
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 1.4rem;
-  background: linear-gradient(130deg, #fffdf5 12%, #ffe9cf 100%);
-  box-shadow: 0 10px 28px rgb(20 34 56 / 10%);
+.masthead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.15rem 0 0.8rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.masthead-copy {
+  min-width: 0;
 }
 
 .eyebrow {
   margin: 0;
-  color: #7d3d00;
-  font-size: 0.86rem;
-  letter-spacing: 0.09em;
+  color: #8a4300;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
 h1 {
-  margin: 0.35rem 0;
+  margin: 0.1rem 0;
   font-family: "Literata", serif;
-  line-height: 1.15;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  line-height: 1.08;
 }
 
-.hero p {
-  margin: 0.3rem 0 0;
-  max-width: 60ch;
+.masthead-subtitle {
+  margin: 0.15rem 0 0;
+  color: #647080;
+  font-size: 0.86rem;
+}
+
+.tools-menu {
+  position: relative;
+  flex: 0 0 auto;
+  z-index: 20;
+}
+
+.tools-menu summary {
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem;
+  color: #33465f;
+  background: rgb(255 255 255 / 78%);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tools-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.tools-menu[open] summary {
+  border-color: #c9a16f;
+  background: #fff8ed;
 }
 
 .tools-links {
-  margin-top: 0.8rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem 0.65rem;
-  font-size: 0.9rem;
-}
-
-.tools-links span {
-  font-weight: 700;
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  width: 220px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffef9;
+  box-shadow: 0 14px 32px rgb(20 34 56 / 16%);
 }
 
 .tools-links a {
-  display: inline-block;
-  padding: 0.35rem 0.55rem;
-  border: 1px solid #e6ba8b;
-  border-radius: 9px;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
   color: #7d3d00;
-  background: #fff7ea;
   text-decoration: none;
+  font-size: 0.86rem;
   font-weight: 600;
 }
 
 .tools-links a:hover {
-  border-color: #d79a60;
   background: #ffefd9;
 }
 
 .controls-wrap {
-  margin: 1.1rem 0;
-  display: grid;
-  gap: 0.75rem;
+  margin: 0.65rem 0 0.7rem;
+}
+
+.filter-drawer {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(255 254 249 / 82%);
+  overflow: hidden;
+}
+
+.filter-drawer summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 2.6rem 0.55rem 0.75rem;
+  list-style: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.filter-drawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.filter-drawer summary::after {
+  content: "+";
+  position: absolute;
+  right: 0.8rem;
+  color: var(--accent);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.filter-drawer[open] summary::after {
+  content: "−";
+}
+
+.filter-title {
+  flex: 0 0 auto;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.filter-summary {
+  min-width: 0;
+  overflow: hidden;
+  color: #66717f;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-drawer[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.filter-drawer .controls {
+  padding: 0.8rem;
 }
 
 .controls {
@@ -158,7 +248,17 @@ h1 {
 }
 
 .card-shell {
+  margin-top: 0.25rem;
+}
+
+.session-panel {
   margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.session-panel .geometry-diagnostic-panel {
+  margin-top: 0;
 }
 
 .meta {
@@ -608,6 +708,26 @@ h1 {
 }
 
 @media (max-width: 700px) {
+  .app {
+    padding: 0.75rem 0.7rem 1.8rem;
+  }
+
+  .masthead {
+    align-items: flex-start;
+  }
+
+  .masthead-subtitle {
+    display: none;
+  }
+
+  .tools-menu summary {
+    padding: 0.45rem 0.65rem;
+  }
+
+  .filter-drawer summary {
+    align-items: flex-start;
+  }
+
   .controls {
     grid-template-columns: 1fr;
   }

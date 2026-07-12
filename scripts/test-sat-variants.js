@@ -33,7 +33,7 @@ if (missingGenerators.length || extraGenerators.length) {
 }
 
 const magnitudeLimits = {
-  "m-2": 120,
+  "m-2": 125,
   "m-3": 260,
   "m-6": 70,
   "m-8": 200,

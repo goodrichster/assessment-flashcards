@@ -10,27 +10,33 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Literata:opsz,wght@7..72,500;7..72,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260711-2" />
+    <link rel="stylesheet" href="./styles.css?v=20260711-3" />
   </head>
   <body>
     <main class="app">
-      <header class="hero">
-        <p class="eyebrow">Study Sprint</p>
-        <h1>Assessment Flashcards</h1>
-        <p>
-          Drill high-level concepts and sample problems across Math, Reading,
-          Writing, and Science.
-        </p>
-        <div class="tools-links" aria-label="Study tools">
-          <span>Tools:</span>
-          <a href="https://www.desmos.com/testing/collegeboard/fourfunction" target="_blank" rel="noopener noreferrer">Desmos Four-Function</a>
-          <a href="https://www.desmos.com/testing/collegeboard/scientific" target="_blank" rel="noopener noreferrer">Desmos Scientific</a>
-          <a href="https://www.desmos.com/testing/collegeboard/graphing" target="_blank" rel="noopener noreferrer">Desmos Graphing</a>
+      <header class="masthead">
+        <div class="masthead-copy">
+          <p class="eyebrow">Study Sprint</p>
+          <h1>Assessment Flashcards</h1>
+          <p class="masthead-subtitle">Focused ACT, SAT, and geometry practice.</p>
         </div>
+        <details class="tools-menu">
+          <summary>Calculator tools</summary>
+          <div class="tools-links" aria-label="Study tools">
+            <a href="https://www.desmos.com/testing/collegeboard/fourfunction" target="_blank" rel="noopener noreferrer">Four-Function</a>
+            <a href="https://www.desmos.com/testing/collegeboard/scientific" target="_blank" rel="noopener noreferrer">Scientific</a>
+            <a href="https://www.desmos.com/testing/collegeboard/graphing" target="_blank" rel="noopener noreferrer">Graphing</a>
+          </div>
+        </details>
       </header>
 
       <section class="controls-wrap" aria-label="Flashcard controls">
-        <div class="controls">
+        <details class="filter-drawer">
+          <summary>
+            <span class="filter-title">Filters</span>
+            <span class="filter-summary" id="filterSummary">All cards</span>
+          </summary>
+          <div class="controls">
           <div class="filter-field">
             <label for="examFilter">Exam</label>
             <select id="examFilter">
@@ -91,28 +97,8 @@
               <option value="all">All</option>
             </select>
           </div>
-        </div>
-
-        <div class="tracking-controls">
-          <p id="sessionStats">Attempts: 0 | Correct: 0 | Incorrect: 0</p>
-          <div class="tracking-actions">
-            <button id="reviewMissedBtn" type="button">Review Missed: Off</button>
-            <button id="resetTrackingBtn" type="button">Reset Tracking</button>
           </div>
-        </div>
-
-        <div id="geometryDiagnosticPanel" class="geometry-diagnostic-panel hidden" aria-label="Geometry Diagnostic">
-          <h3>H.S. Geometry Diagnostic</h3>
-          <p>Answer geometry cards above; responses are recorded. After 25 questions (or anytime), view your report and study plan.</p>
-          <div class="diagnostic-actions">
-            <button id="viewGeometryReportBtn" type="button">View Diagnostic Report</button>
-            <button id="exportReportJsonBtn" type="button">Export Report (JSON)</button>
-            <button id="exportReportMdBtn" type="button">Export Report (Markdown)</button>
-            <button id="exportResponsesCsvBtn" type="button">Export Responses (CSV)</button>
-            <button id="resetGeometryDiagnosticBtn" type="button">Reset Diagnostic</button>
-          </div>
-          <div id="geometryReportContent" class="geometry-report-content"></div>
-        </div>
+        </details>
       </section>
 
       <section class="card-shell" aria-live="polite">
@@ -137,6 +123,30 @@
         <button id="shuffleBtn" type="button">Shuffle</button>
         <button id="nextBtn" type="button">Next</button>
       </nav>
+
+      <section class="session-panel" aria-label="Session progress">
+
+        <div class="tracking-controls">
+          <p id="sessionStats">Attempts: 0 | Correct: 0 | Incorrect: 0</p>
+          <div class="tracking-actions">
+            <button id="reviewMissedBtn" type="button">Review Missed: Off</button>
+            <button id="resetTrackingBtn" type="button">Reset Tracking</button>
+          </div>
+        </div>
+
+        <div id="geometryDiagnosticPanel" class="geometry-diagnostic-panel hidden" aria-label="Geometry Diagnostic">
+          <h3>H.S. Geometry Diagnostic</h3>
+          <p>Answer geometry cards above; responses are recorded. After 25 questions (or anytime), view your report and study plan.</p>
+          <div class="diagnostic-actions">
+            <button id="viewGeometryReportBtn" type="button">View Diagnostic Report</button>
+            <button id="exportReportJsonBtn" type="button">Export Report (JSON)</button>
+            <button id="exportReportMdBtn" type="button">Export Report (Markdown)</button>
+            <button id="exportResponsesCsvBtn" type="button">Export Responses (CSV)</button>
+            <button id="resetGeometryDiagnosticBtn" type="button">Reset Diagnostic</button>
+          </div>
+          <div id="geometryReportContent" class="geometry-report-content"></div>
+        </div>
+      </section>
     </main>
 
     <div id="tutorModal" class="tutor-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tutorTitle">
