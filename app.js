@@ -1489,6 +1489,8 @@ const seenIds = new Set();
 const missedIds = new Set();
 const cardResults = new Map();
 const tutorThreads = new Map();
+const cardVariantCache = new Map();
+let variantRound = 1;
 let tutorIsOpen = false;
 let activeTutorCardId = null;
 let tutorMode = "walkthrough";
@@ -1619,9 +1621,33 @@ function renderCardFace(faceEl, card, side) {
   faceEl.appendChild(body);
 }
 
+function hasGeneratedVariant(card) {
+  return (
+    card &&
+    typeof SatVariantGenerator !== "undefined" &&
+    SatVariantGenerator.has(card.id)
+  );
+}
+
+function getCardVariant(card) {
+  if (!hasGeneratedVariant(card)) return card;
+
+  if (!cardVariantCache.has(card.id)) {
+    cardVariantCache.set(card.id, SatVariantGenerator.generate(card));
+  }
+
+  return cardVariantCache.get(card.id);
+}
+
+function startNewVariantRound() {
+  variantRound += 1;
+  cardVariantCache.clear();
+  tutorThreads.clear();
+}
+
 function getCurrentCard() {
   if (!filteredCards.length) return null;
-  return filteredCards[index] || null;
+  return getCardVariant(filteredCards[index] || null);
 }
 
 function getChoiceLinesFromFront(frontText) {
@@ -2065,7 +2091,7 @@ function renderCard() {
     return;
   }
 
-  const current = filteredCards[index];
+  const current = getCurrentCard();
   cardViewStartTime = Date.now();
   const result = cardResults.get(current.id) || "unanswered";
   const modeLabel = reviewMissedOnly ? " | Missed Review" : "";
@@ -2077,9 +2103,10 @@ function renderCard() {
   const sourceLabel = current.source ? ` | Source: ${current.source}` : "";
   const satDomain = getSatMathDomain(current);
   const satDomainLabel = satDomain ? ` | SAT Domain: ${satDomain}` : "";
+  const variantLabel = current.isGeneratedVariant ? ` | Number Set: ${variantRound}` : "";
   cardAttributes.textContent = `Difficulty: ${formatDifficulty(current.difficulty)} | Question Type: ${
     current.questionType
-  } | Focus: ${current.focus.join(", ")}${satDomainLabel}${sourceLabel}`;
+  } | Focus: ${current.focus.join(", ")}${satDomainLabel}${variantLabel}${sourceLabel}`;
 
   renderCardFace(cardFront, current, "front");
   renderCardFace(cardBack, current, "back");
@@ -2144,7 +2171,9 @@ function renderGeometryReportContent() {
 
 function nextCard() {
   if (!filteredCards.length) return;
-  index = (index + 1) % filteredCards.length;
+  const nextIndex = (index + 1) % filteredCards.length;
+  if (nextIndex === 0) startNewVariantRound();
+  index = nextIndex;
   renderCard();
 }
 
@@ -2156,6 +2185,8 @@ function prevCard() {
 
 function shuffleCards() {
   if (!filteredCards.length) return;
+
+  startNewVariantRound();
 
   for (let i = filteredCards.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -2169,7 +2200,7 @@ function shuffleCards() {
 function markCard(isCorrect) {
   if (!filteredCards.length) return;
 
-  const current = filteredCards[index];
+  const current = getCurrentCard();
 
   attempts += 1;
   seenIds.add(current.id);
@@ -2220,6 +2251,7 @@ function resetTracking() {
   seenIds.clear();
   missedIds.clear();
   cardResults.clear();
+  startNewVariantRound();
 
   reviewMissedOnly = false;
   reviewMissedBtn.textContent = "Review Missed: Off";
