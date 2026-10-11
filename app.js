@@ -1514,6 +1514,8 @@ const FILTER_QUERY_PARAM_KEYS = {
 };
 const CARD_QUERY_PARAM_KEY = "cardId";
 const TUTOR_QUERY_PARAM_KEY = "tutor";
+const REVIEW_QUERY_PARAM_KEY = "review";
+const DEFINITIONS_REVIEW_VALUE = "definitions";
 const TUTOR_API_URL = "http://localhost:8787/api/tutor/chat";
 
 let filteredCards = [...cards];
@@ -1590,7 +1592,20 @@ function configureTutorVisibility() {
   }
 }
 
-function openDefinitionsReview() {
+function setDefinitionsReviewUrlState(isOpen) {
+  const params = new URLSearchParams(window.location.search);
+  if (isOpen) {
+    params.set(REVIEW_QUERY_PARAM_KEY, DEFINITIONS_REVIEW_VALUE);
+  } else {
+    params.delete(REVIEW_QUERY_PARAM_KEY);
+  }
+
+  const nextSearch = params.toString();
+  const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, "", nextUrl);
+}
+
+function openDefinitionsReview({ syncUrl = true } = {}) {
   const definitionCards = filteredCards.filter(
     (card) => card.type === "concept" && card.front && (card.answer || card.back)
   );
@@ -1619,11 +1634,13 @@ function openDefinitionsReview() {
   }
 
   definitionsModal.classList.remove("hidden");
+  if (syncUrl) setDefinitionsReviewUrlState(true);
   closeDefinitionsBtn.focus();
 }
 
-function closeDefinitionsReview() {
+function closeDefinitionsReview({ syncUrl = true } = {}) {
   definitionsModal.classList.add("hidden");
+  if (syncUrl) setDefinitionsReviewUrlState(false);
   reviewDefinitionsBtn.focus();
 }
 
@@ -2210,6 +2227,7 @@ function syncFiltersToUrl() {
 function applyFiltersFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const requestedCardId = params.get(CARD_QUERY_PARAM_KEY);
+  const requestedReview = params.get(REVIEW_QUERY_PARAM_KEY);
 
   setSelectFromQuery(examFilter, params.get(FILTER_QUERY_PARAM_KEYS.exam));
   setSelectFromQuery(typeFilter, params.get(FILTER_QUERY_PARAM_KEYS.type));
@@ -2232,6 +2250,10 @@ function applyFiltersFromUrl() {
 
   syncFiltersToUrl();
   updateGeometryPanelVisibility();
+
+  if (requestedReview === DEFINITIONS_REVIEW_VALUE) {
+    openDefinitionsReview({ syncUrl: false });
+  }
 }
 
 function getSelectedFilterLabel(selectElement) {
@@ -2527,8 +2549,8 @@ if (resetGeometryDiagnosticBtn) resetGeometryDiagnosticBtn.addEventListener("cli
 });
 reviewMissedBtn.addEventListener("click", toggleReviewMissed);
 resetTrackingBtn.addEventListener("click", resetTracking);
-reviewDefinitionsBtn.addEventListener("click", openDefinitionsReview);
-closeDefinitionsBtn.addEventListener("click", closeDefinitionsReview);
+reviewDefinitionsBtn.addEventListener("click", () => openDefinitionsReview());
+closeDefinitionsBtn.addEventListener("click", () => closeDefinitionsReview());
 definitionsModal.addEventListener("click", (event) => {
   if (event.target === definitionsModal) {
     closeDefinitionsReview();

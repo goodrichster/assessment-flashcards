@@ -42,6 +42,12 @@ The tutor button is hidden by default. Add `?tutor=1` to the flashcard URL to sh
 http://localhost:8000/?tutor=1
 ```
 
+Add `review=definitions` to open a permalinkable definitions review for the active filters:
+
+```text
+http://localhost:8000/?exam=Trig%20II&type=concept&review=definitions
+```
+
 To use another web port, pass it as the first argument:
 
 ```bash
