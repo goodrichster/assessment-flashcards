@@ -1424,6 +1424,7 @@ function buildInlineGeometryCards() {
 const cards = [
   ...baseCards,
   ...(typeof practiceCards !== "undefined" ? practiceCards : []),
+  ...(typeof trigIICards !== "undefined" ? trigIICards : []),
   ...getGeometryCards(),
 ];
 
@@ -1525,6 +1526,7 @@ let variantRound = 1;
 let tutorIsOpen = false;
 let activeTutorCardId = null;
 let tutorMode = "walkthrough";
+let tutorMathTimer = null;
 
 function formatDifficulty(value) {
   if (value === "easy") return "Easy";
@@ -1712,14 +1714,105 @@ function escapeHtml(value) {
 }
 
 function formatInlineMarkdown(text) {
-  return text
+  const mathSegments = [];
+  const protectedText = text.replace(/\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/g, (segment) => {
+    const token = `TUTORMATHPLACEHOLDER${mathSegments.length}TOKEN`;
+    mathSegments.push(segment);
+    return token;
+  });
+
+  const formatted = protectedText
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+  return formatted.replace(/TUTORMATHPLACEHOLDER(\d+)TOKEN/g, (_, index) => mathSegments[Number(index)]);
+}
+
+function looksLikeTutorMath(expression) {
+  const value = expression.trim();
+  if (/[=^_\\{}]/.test(value)) return true;
+  if (/^[A-Za-z][A-Za-z0-9]*\([^()\n]+\)$/.test(value)) return true;
+  return /^[A-Za-z](?:\s*[+\-*/]\s*[A-Za-z0-9]+)*$/.test(value);
+}
+
+function normalizeTutorMathDelimiters(content) {
+  return String(content || "")
+    .replace(/\\\\([()[\]])/g, "\\$1")
+    .replace(/\$\$([\s\S]+?)\$\$/g, "\\[$1\\]")
+    .replace(/\$([^$\n]+)\$/g, (match, expression) => {
+      const value = expression.trim();
+      const isNumericMath = /^[+-]?\d+(?:\.\d+)?$/.test(value);
+      return looksLikeTutorMath(value) || isNumericMath ? `\\(${value}\\)` : match;
+    })
+    .replace(/\$([^$\n]+)$/gm, (match, expression) => {
+      const value = expression.trim();
+      const numericThenProse = value.match(/^([+-]?\d+(?:\.\d+)?)\s+([A-Za-z][\s\S]*)$/);
+      if (numericThenProse) {
+        return `\\(${numericThenProse[1]}\\) ${numericThenProse[2]}`;
+      }
+      if (/\\(?:\(|\[)/.test(value)) {
+        return value;
+      }
+
+      const isComplete = !/[=+\-*/^_]$/.test(value);
+      return looksLikeTutorMath(value) && isComplete ? `\\(${value}\\)` : match;
+    })
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_, expression) => {
+      const singleLineExpression = expression.replace(/\s+/g, " ").trim();
+      return `\\[${singleLineExpression}\\]`;
+    });
+}
+
+function normalizeTutorPlainMath(content) {
+  const mathSegments = [];
+  const protectMath = (segment) => {
+    const token = `TUTORPLAINMATHPLACEHOLDER${mathSegments.length}TOKEN`;
+    mathSegments.push(segment);
+    return token;
+  };
+
+  let normalized = String(content || "").replace(
+    /\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/g,
+    protectMath
+  );
+
+  normalized = normalized.replace(
+    /(^|[ \t:(])([A-Za-z][ \t]*=[ \t]*[-+*/()A-Za-z0-9.^_ \t]+?)(?=[ \t]+(?:is|are|represents?|where|when|which|used|to|for)\b|[,.;:!?]|$)/gm,
+    (_, prefix, equation) => {
+      const expandedEquation = equation.replace(
+        /TUTORPLAINMATHPLACEHOLDER(\d+)TOKEN/g,
+        (_, index) => mathSegments[Number(index)].slice(2, -2)
+      );
+      const equationTex = expandedEquation.trim().replace(
+        /(-?[A-Za-z0-9]+)\/\(([^()]+)\)/g,
+        "\\frac{$1}{$2}"
+      );
+      return `${prefix}${protectMath(`\\(${equationTex}\\)`)}`;
+    }
+  );
+
+  normalized = normalized.replace(/(\d*)√(\([^()\n]+\)|[A-Za-z0-9.]+)/g, (_, coefficient, radicand) => {
+    const value = radicand.startsWith("(") ? radicand.slice(1, -1) : radicand;
+    return protectMath(`\\(${coefficient}\\sqrt{${value}}\\)`);
+  });
+
+  normalized = normalized.replace(
+    /\b([A-Za-z0-9]+)\^(?:\(([+-]?\d+)\)|([+-]?\d+))/g,
+    (_, base, parenthesizedExponent, exponent) => {
+      const value = parenthesizedExponent || exponent;
+      return protectMath(`\\(${base}^{${value}}\\)`);
+    }
+  );
+
+  return normalized.replace(/TUTORPLAINMATHPLACEHOLDER(\d+)TOKEN/g, (_, index) => {
+    return mathSegments[Number(index)];
+  });
 }
 
 function renderTutorMarkdown(content) {
-  const safe = escapeHtml(content || "");
+  const delimited = normalizeTutorMathDelimiters(content);
+  const safe = escapeHtml(normalizeTutorPlainMath(delimited));
   const lines = safe.split("\n");
   const html = [];
   let listOpen = false;
@@ -1817,11 +1910,32 @@ function appendTutorMessage(role, content) {
   msg.className = `tutor-msg ${role}`;
   if (role === "assistant") {
     msg.innerHTML = renderTutorMarkdown(content);
+  } else if (role === "system") {
+    appendMathFormattedText(msg, content);
   } else {
     msg.textContent = content;
   }
   tutorMessages.appendChild(msg);
 }
+
+function typesetTutorMath() {
+  window.clearTimeout(tutorMathTimer);
+  tutorMathTimer = window.setTimeout(async () => {
+    const mathJax = window.MathJax;
+    if (!mathJax?.typesetPromise) return;
+
+    try {
+      await mathJax.startup?.promise;
+      mathJax.typesetClear?.([tutorMessages]);
+      await mathJax.typesetPromise([tutorMessages]);
+      tutorMessages.scrollTop = tutorMessages.scrollHeight;
+    } catch (error) {
+      console.warn("Tutor math rendering failed:", error);
+    }
+  }, 80);
+}
+
+window.addEventListener("mathjax-ready", typesetTutorMath);
 
 function renderTutorMessagesForCard(cardId) {
   tutorMessages.replaceChildren();
@@ -1829,6 +1943,7 @@ function renderTutorMessagesForCard(cardId) {
   for (const item of thread) {
     appendTutorMessage(item.role, item.content);
   }
+  typesetTutorMath();
   tutorMessages.scrollTop = tutorMessages.scrollHeight;
 }
 
@@ -1924,20 +2039,24 @@ async function sendTutorMessage(message, mode = tutorMode) {
     const decoder = new TextDecoder();
     const reader = response.body.getReader();
     let streamReply = "";
+    let publishedLength = 0;
 
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
       streamReply += decoder.decode(value, { stream: true });
-      thread[thread.length - 1].content = streamReply;
-      renderTutorMessagesForCard(card.id);
+
+      const lastCompleteLine = streamReply.lastIndexOf("\n") + 1;
+      if (lastCompleteLine > publishedLength) {
+        publishedLength = lastCompleteLine;
+        thread[thread.length - 1].content = streamReply.slice(0, publishedLength).trimEnd();
+        renderTutorMessagesForCard(card.id);
+      }
     }
 
-    streamReply = streamReply.trim();
-    if (!streamReply) {
-      thread[thread.length - 1].content = "I could not generate a reply.";
-      renderTutorMessagesForCard(card.id);
-    }
+    streamReply = (streamReply + decoder.decode()).trim();
+    thread[thread.length - 1].content = streamReply || "I could not generate a reply.";
+    renderTutorMessagesForCard(card.id);
   } catch (error) {
     thread[thread.length - 1].content = `Tutor error: ${error?.message || "Unknown error"}`;
   } finally {

@@ -10,7 +10,25 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Literata:opsz,wght@7..72,500;7..72,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260711-3" />
+    <link rel="stylesheet" href="./styles.css?v=20260712-1" />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["\\(", "\\)"]],
+          displayMath: [["\\[", "\\]"]],
+        },
+        options: {
+          skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"],
+        },
+        startup: {
+          ready() {
+            MathJax.startup.defaultReady();
+            window.dispatchEvent(new Event("mathjax-ready"));
+          },
+        },
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
   </head>
   <body>
     <main class="app">
@@ -18,7 +36,7 @@
         <div class="masthead-copy">
           <p class="eyebrow">Study Sprint</p>
           <h1>Assessment Flashcards</h1>
-          <p class="masthead-subtitle">Focused ACT, SAT, and geometry practice.</p>
+          <p class="masthead-subtitle">Focused ACT, SAT, geometry, and Trig II practice.</p>
         </div>
         <details class="tools-menu">
           <summary>Calculator tools</summary>
@@ -44,6 +62,7 @@
               <option value="ACT">ACT</option>
               <option value="SAT">SAT</option>
               <option value="Both">Both</option>
+              <option value="Trig II">Trig II</option>
               <option value="HSGeometry">H.S. Geometry Assessment</option>
             </select>
           </div>
@@ -187,8 +206,9 @@
 
     <script src="data/practice-cards.js"></script>
     <script src="data/geometry-cards.js"></script>
+    <script src="data/trig-ii-cards.js"></script>
     <script src="geometry-assessment.js"></script>
     <script src="data/sat-variant-generators.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=20260712-9"></script>
   </body>
 </html>

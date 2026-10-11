@@ -42,6 +42,7 @@ Output style:
   - Inline math must use \\( ... \\)
   - Display equations must use \\[ ... \\]
   - Use LaTeX symbols/functions for fractions, exponents, roots, inequalities, trig, logs, and absolute value
+  - Delimit every mathematical expression, including single values, function notation, exponents, and roots; never emit raw $...$, caret notation, or Unicode √ notation
 - Keep prose concise around equations.
 - Use short section labels in plain text:
   Concepts:

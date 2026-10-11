@@ -28,7 +28,7 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-for command_name in python3 node npm; do
+for command_name in python3 node npm curl; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     echo "Required command not found: $command_name" >&2
     exit 1
@@ -80,15 +80,31 @@ if command -v curl >/dev/null 2>&1; then
   fi
 fi
 
-echo "Starting Assessment Tutor API at http://localhost:${TUTOR_PORT}"
-PORT="$TUTOR_PORT" OLLAMA_MODEL="$OLLAMA_MODEL" npm --prefix "$SERVER_DIR" start &
-TUTOR_PID=$!
+TUTOR_API_URL="http://localhost:${TUTOR_PORT}/api/tutor/chat"
+if curl -fsS -o /dev/null -X OPTIONS "$TUTOR_API_URL" 2>/dev/null; then
+  echo "Using Assessment Tutor API already running at http://localhost:${TUTOR_PORT}"
+else
+  echo "Starting Assessment Tutor API at http://localhost:${TUTOR_PORT}"
+  PORT="$TUTOR_PORT" OLLAMA_MODEL="$OLLAMA_MODEL" node "$SERVER_DIR/server.js" &
+  TUTOR_PID=$!
 
-sleep 0.5
-if ! kill -0 "$TUTOR_PID" 2>/dev/null; then
-  echo "Assessment Tutor API failed to start." >&2
-  wait "$TUTOR_PID" || true
-  exit 1
+  tutor_ready=false
+  for _ in {1..20}; do
+    if curl -fsS -o /dev/null -X OPTIONS "$TUTOR_API_URL" 2>/dev/null; then
+      tutor_ready=true
+      break
+    fi
+    if ! kill -0 "$TUTOR_PID" 2>/dev/null; then
+      break
+    fi
+    sleep 0.25
+  done
+
+  if [[ "$tutor_ready" != true ]]; then
+    echo "Assessment Tutor API failed to start." >&2
+    wait "$TUTOR_PID" 2>/dev/null || true
+    exit 1
+  fi
 fi
 
 cd "$PROJECT_DIR"

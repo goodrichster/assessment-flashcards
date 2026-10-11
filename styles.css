@@ -635,6 +635,17 @@ h1 {
   background: #ffffff;
 }
 
+.tutor-msg.assistant mjx-container {
+  color: #152238;
+}
+
+.tutor-msg.assistant mjx-container[display="true"] {
+  margin: 0.7rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0;
+}
+
 .tutor-msg.system {
   font-size: 0.9rem;
   color: #445a75;
