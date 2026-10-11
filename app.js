@@ -1479,6 +1479,12 @@ const correctBtn = document.getElementById("correctBtn");
 const reviewMissedBtn = document.getElementById("reviewMissedBtn");
 const resetTrackingBtn = document.getElementById("resetTrackingBtn");
 const sessionStats = document.getElementById("sessionStats");
+const reviewDefinitionsBtn = document.getElementById("reviewDefinitionsBtn");
+const definitionsModal = document.getElementById("definitionsModal");
+const closeDefinitionsBtn = document.getElementById("closeDefinitionsBtn");
+const definitionsContext = document.getElementById("definitionsContext");
+const definitionsList = document.getElementById("definitionsList");
+const tutorActions = document.getElementById("tutorActions");
 const openTutorBtn = document.getElementById("openTutorBtn");
 const tutorModal = document.getElementById("tutorModal");
 const closeTutorBtn = document.getElementById("closeTutorBtn");
@@ -1507,6 +1513,7 @@ const FILTER_QUERY_PARAM_KEYS = {
   questionType: "questionType",
 };
 const CARD_QUERY_PARAM_KEY = "cardId";
+const TUTOR_QUERY_PARAM_KEY = "tutor";
 const TUTOR_API_URL = "http://localhost:8787/api/tutor/chat";
 
 let filteredCards = [...cards];
@@ -1569,6 +1576,55 @@ function appendTextBlock(parent, text, className = "face-text") {
   block.className = className;
   appendMathFormattedText(block, text);
   parent.appendChild(block);
+}
+
+function configureTutorVisibility() {
+  const value = new URLSearchParams(window.location.search)
+    .get(TUTOR_QUERY_PARAM_KEY)
+    ?.toLowerCase();
+  const tutorEnabled = ["1", "true", "yes", "on"].includes(value);
+  tutorActions.classList.toggle("hidden", !tutorEnabled);
+
+  if (!tutorEnabled && tutorIsOpen) {
+    closeTutorModal();
+  }
+}
+
+function openDefinitionsReview() {
+  const definitionCards = filteredCards.filter(
+    (card) => card.type === "concept" && card.front && (card.answer || card.back)
+  );
+
+  definitionsList.replaceChildren();
+  definitionsContext.textContent = definitionCards.length
+    ? `${definitionCards.length} concept ${definitionCards.length === 1 ? "definition" : "definitions"} matching the active filters.`
+    : "No concept definitions match the active filters.";
+
+  for (const card of definitionCards) {
+    const item = document.createElement("article");
+    item.className = "definition-item";
+
+    const category = document.createElement("p");
+    category.className = "definition-category";
+    category.textContent = card.questionType || card.subject;
+
+    const term = document.createElement("h3");
+    appendMathFormattedText(term, card.front);
+
+    const definition = document.createElement("p");
+    appendMathFormattedText(definition, card.answer || card.back);
+
+    item.append(category, term, definition);
+    definitionsList.appendChild(item);
+  }
+
+  definitionsModal.classList.remove("hidden");
+  closeDefinitionsBtn.focus();
+}
+
+function closeDefinitionsReview() {
+  definitionsModal.classList.add("hidden");
+  reviewDefinitionsBtn.focus();
 }
 
 function appendImageBlock(parent, src, alt, caption) {
@@ -2471,6 +2527,13 @@ if (resetGeometryDiagnosticBtn) resetGeometryDiagnosticBtn.addEventListener("cli
 });
 reviewMissedBtn.addEventListener("click", toggleReviewMissed);
 resetTrackingBtn.addEventListener("click", resetTracking);
+reviewDefinitionsBtn.addEventListener("click", openDefinitionsReview);
+closeDefinitionsBtn.addEventListener("click", closeDefinitionsReview);
+definitionsModal.addEventListener("click", (event) => {
+  if (event.target === definitionsModal) {
+    closeDefinitionsReview();
+  }
+});
 openTutorBtn.addEventListener("click", openTutorModal);
 closeTutorBtn.addEventListener("click", closeTutorModal);
 tutorModal.addEventListener("click", (event) => {
@@ -2498,5 +2561,12 @@ tutorCheckWorkBtn.addEventListener("click", async () => {
   await sendTutorMessage("Check my work approach and point out the first mistake.", "check_work");
 });
 
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  if (!definitionsModal.classList.contains("hidden")) closeDefinitionsReview();
+  if (!tutorModal.classList.contains("hidden")) closeTutorModal();
+});
+
+configureTutorVisibility();
 updateSessionStats();
 applyFiltersFromUrl();

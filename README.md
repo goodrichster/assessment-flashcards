@@ -12,8 +12,9 @@ The app supports:
 - Filters for exam, subject, difficulty, card type, and question type
 - Randomized SAT coefficients and constants within each problem's intended magnitude
 - Session self-grading and missed-question review
+- A filter-aware definitions review sheet
 - Persistent browser tracking, diagnostic reports, and exports
-- A local AI tutor for hints, step-by-step help, and work checking
+- An optional local AI tutor for hints, step-by-step help, and work checking
 
 ## Project Structure
 
@@ -34,6 +35,12 @@ From the project root:
 ```
 
 The flashcards run at `http://localhost:8000`, and the tutor API runs at `http://localhost:8787`.
+
+The tutor button is hidden by default. Add `?tutor=1` to the flashcard URL to show it:
+
+```text
+http://localhost:8000/?tutor=1
+```
 
 To use another web port, pass it as the first argument:
 
